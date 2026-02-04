@@ -2,6 +2,8 @@
 
 Allows to flash stm32 firmware thru rp2350 running as debugprobe.
 
+Build with options: ```-DDEBUG_ON_PICO=1 -DPICO_BOARD=pico2```
+
 Commands used for flashing stm32 thru debugprobe with openocd CMSIS-DAP interface:
 
 ```openocd -f interface/cmsis-dap.cfg -c "adapter speed 1000" -c "transport select swd" -f target/stm32f0x.cfg -c "program dada-tbd-ui.elf verify reset exit"```

@@ -24,6 +24,9 @@
  *
  */
 
+// works also with STM32 empty, despite STM32 delivers all keyboard data
+#define USE_UI_KEYS 1
+
 #include "FreeRTOS.h"
 #include "task.h"
 
@@ -125,6 +128,7 @@ void usb_thread(void *ptr)
 #define tud_vendor_flush(x) ((void)0)
 #endif
 
+#ifdef USE_UI_KEYS
 void keyboard_thread(void *ptr){
     TickType_t wake;
     wake = xTaskGetTickCount();
@@ -144,6 +148,7 @@ void keyboard_thread(void *ptr){
         }
     } while (1);
 }
+#endif
 
 int main(void) {
     // Declare pins in binary information
@@ -159,7 +164,9 @@ int main(void) {
 
     // ui api for tbd hardware
     stdio_init_all();
+#ifdef USE_UI_KEYS
     init_i2c_kbd();
+#endif
     ssd1309_init();
     ssd1309_clear();
 
@@ -168,7 +175,9 @@ int main(void) {
 
     if (THREADED) {
         xTaskCreate(usb_thread, "TUD", configMINIMAL_STACK_SIZE, NULL, TUD_TASK_PRIO, &tud_taskhandle);
+#ifdef USE_UI_KEYS
         xTaskCreate(keyboard_thread, "KBD", configMINIMAL_STACK_SIZE, NULL, UART_TASK_PRIO, NULL);
+#endif
 #if PICO_RP2040
         xTaskCreate(dev_mon, "WDOG", configMINIMAL_STACK_SIZE, NULL, TUD_TASK_PRIO, &mon_taskhandle);
 #endif
