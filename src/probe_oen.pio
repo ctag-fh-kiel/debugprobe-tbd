@@ -83,7 +83,7 @@ static inline void probe_gpio_deinit()
 static inline void probe_sm_init(pio_sm_config* sm_config) {
 
     // Set SWDIOEN and SWCLK as sideset pins
-    sm_config_set_sideset_pins(sm_config, PROBE_PIN_SWDIOEN);
+    sm_config_set_sideset_pins(sm_config, PROBE_PIN_SWDIOEN - 16);
 
     // Set SWDIO offset
     // here we need to subtract the gpio bank offset of 16 for high gpios
