@@ -46,6 +46,10 @@
 #include "DAP.h"
 #include "hardware/structs/usb.h"
 
+#include "i2ckbd.h"
+#include "ssd1309.h"
+#include "hardware/watchdog.h"
+
 // UART0 for debugprobe debug
 // UART1 for debugprobe to target device
 
@@ -121,6 +125,26 @@ void usb_thread(void *ptr)
 #define tud_vendor_flush(x) ((void)0)
 #endif
 
+void keyboard_thread(void *ptr){
+    TickType_t wake;
+    wake = xTaskGetTickCount();
+    int key;
+    do {
+        key = read_i2c_kbd();
+        if (key != -1) {
+            // reboot on page up
+            if (key == 0xb3){
+                ssd1309_clear();
+                probe_info("Rebooting...\n");
+                sleep_ms(2000);
+                watchdog_reboot(0, 0, 0);
+            }
+        } else {
+            xTaskDelayUntil(&wake, 10);
+        }
+    } while (1);
+}
+
 int main(void) {
     // Declare pins in binary information
     bi_decl_config();
@@ -133,10 +157,18 @@ int main(void) {
 
     DAP_Setup();
 
+    // ui api for tbd hardware
+    stdio_init_all();
+    init_i2c_kbd();
+    ssd1309_init();
+    ssd1309_clear();
+
     probe_info("Welcome to debugprobe!\n");
+    sleep_ms(2000);
 
     if (THREADED) {
         xTaskCreate(usb_thread, "TUD", configMINIMAL_STACK_SIZE, NULL, TUD_TASK_PRIO, &tud_taskhandle);
+        xTaskCreate(keyboard_thread, "KBD", configMINIMAL_STACK_SIZE, NULL, UART_TASK_PRIO, NULL);
 #if PICO_RP2040
         xTaskCreate(dev_mon, "WDOG", configMINIMAL_STACK_SIZE, NULL, TUD_TASK_PRIO, &mon_taskhandle);
 #endif

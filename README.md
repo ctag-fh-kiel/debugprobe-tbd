@@ -1,3 +1,12 @@
+# Hacked debugprobe for tbd rev. c
+
+Allows to flash stm32 firmware thru rp2350 running as debugprobe.
+
+Commands used for flashing stm32 thru debugprobe with openocd CMSIS-DAP interface:
+
+```openocd -f interface/cmsis-dap.cfg -c "adapter speed 1000" -c "transport select swd" -f target/stm32f0x.cfg -c "program dada-tbd-ui.elf verify reset exit"```
+
+
 # Debugprobe
 
 Firmware source for the Raspberry Pi Debug Probe SWD/UART accessory. Can also be run on a Raspberry Pi Pico.

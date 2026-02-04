@@ -54,6 +54,8 @@ static inline void probe_gpio_init()
     gpio_init(PROBE_PIN_RESET);
 #endif
     // Funcsel pins
+    // Move PIO GPIO window to cover GPIO 16–47, change bank
+    pio_set_gpio_base(pio0, 16);
     pio_gpio_init(pio0, PROBE_PIN_SWDIOEN);
     pio_gpio_init(pio0, PROBE_PIN_SWCLK);
     pio_gpio_init(pio0, PROBE_PIN_SWDIO);
@@ -84,9 +86,10 @@ static inline void probe_sm_init(pio_sm_config* sm_config) {
     sm_config_set_sideset_pins(sm_config, PROBE_PIN_SWDIOEN);
 
     // Set SWDIO offset
-    sm_config_set_out_pins(sm_config, PROBE_PIN_SWDIO, 1);
-    sm_config_set_set_pins(sm_config, PROBE_PIN_SWDIO, 1);
-    sm_config_set_in_pins(sm_config, PROBE_PIN_SWDI);
+    // here we need to subtract the gpio bank offset of 16 for high gpios
+    sm_config_set_out_pins(sm_config, PROBE_PIN_SWDIO - 16, 1);
+    sm_config_set_set_pins(sm_config, PROBE_PIN_SWDIO - 16, 1);
+    sm_config_set_in_pins(sm_config, PROBE_PIN_SWDI - 16);
 
     // Set SWDIOEN, SWD and SWDIO pins as output to start. This will be set in the sm
     pio_sm_set_consecutive_pindirs(pio0, PROBE_SM, PROBE_PIN_OFFSET, 3, true);

@@ -13,6 +13,9 @@ if (${PICO_SDK_VERSION_MAJOR} LESS 2)
 	message(SEND_ERROR "Version 2 of the Pico SDK is required to compile this project. Please update your installation at ${PICO_SDK_PATH}")
 endif ()
 
+add_subdirectory(libs/i2ckbd i2ckbd)
+add_subdirectory(libs/lcdspi lcdspi)
+
 add_executable(debugprobe
         src/probe_config.c
         src/main.c
@@ -69,6 +72,8 @@ endif ()
 
 
 target_link_libraries(debugprobe PRIVATE
+        i2ckbd
+        lcdspi
         pico_multicore
         pico_stdlib
         pico_unique_id
@@ -79,6 +84,7 @@ target_link_libraries(debugprobe PRIVATE
         FreeRTOS-Kernel-Heap1
 )
 
-pico_set_binary_type(debugprobe copy_to_ram)
+#pico_set_binary_type(debugprobe copy_to_ram)
+pico_set_binary_type(debugprobe no_flash)
 
 pico_add_extra_outputs(debugprobe)

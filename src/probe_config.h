@@ -28,6 +28,7 @@
 
 #include "FreeRTOS.h"
 #include "task.h"
+#include "ssd1309.h"
 
 #if false
 #define probe_info(format,args...) \
@@ -37,7 +38,16 @@ do { \
 	xTaskResumeAll(); \
 } while (0)
 #else
-#define probe_info(format,...) ((void)0)
+//#define probe_info(format,...) ((void)0)
+// print on lcd using ssd1309_print_string(char *s)
+#define probe_info(format,...) \
+do { \
+	char buf[128]; \
+	snprintf(buf, sizeof(buf), format, ## __VA_ARGS__); \
+	ssd1309_set_cursor(0, 0); \
+	ssd1309_print_string(buf); \
+	ssd1309_display(); \
+} while (0)
 #endif
 
 
